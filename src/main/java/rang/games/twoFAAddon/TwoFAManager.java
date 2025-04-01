@@ -78,10 +78,11 @@ public class TwoFAManager {
         Set<String> identifiers = dataConfig.getConfigurationSection("keys").getKeys(false);
         for (String identifier : identifiers) {
             String secret = dataConfig.getString("keys."+ identifier+".secret");
+            String label = dataConfig.getString("keys."+ identifier+".label");
             if (secret != null) {
                 secretCache.put(identifier, secret);
                 QrData data = new QrData.Builder()
-                        .label(identifier)
+                        .label((label != null) ? label : identifier)
                         .secret(secret)
                         .issuer("RangGames")
                         .algorithm(HashingAlgorithm.SHA1)
@@ -99,16 +100,21 @@ public class TwoFAManager {
         }
     }
     public TwoFactorKeyData createKey(String identifier) {
+        return createKey(identifier, identifier);
+    }
+    public TwoFactorKeyData createKey(String identifier, String label) {
         if (secretCache.containsKey(identifier)) return null;
         String secret = secretGenerator.generate();
 
         dataConfig.set("keys." + identifier + ".secret", secret);
+        dataConfig.set("keys." + identifier + ".time", System.currentTimeMillis());
+        dataConfig.set("keys." + identifier + ".label", label);
         saveData();
 
         secretCache.put(identifier, secret);
 
         QrData data = new QrData.Builder()
-                .label(identifier)
+                .label(label)
                 .secret(secret)
                 .issuer("RangGames")
                 .algorithm(HashingAlgorithm.SHA1)
@@ -126,13 +132,14 @@ public class TwoFAManager {
         }
 
         String totpUri = data.getUri();
-        return new TwoFactorKeyData(identifier, secret, totpUri, qrCodeImage);
+        return new TwoFactorKeyData(identifier, label, secret, totpUri, qrCodeImage);
     }
     public String getTotpUri(String identifier) {
         String secret = getSecret(identifier);
+        String label = getLabel(identifier);
         if (secret == null) return null;
         QrData data = new QrData.Builder()
-                .label(identifier)
+                .label(label)
                 .secret(secret)
                 .issuer("RangGames")
                 .algorithm(HashingAlgorithm.SHA1)
@@ -193,19 +200,27 @@ public class TwoFAManager {
         return secret;
     }
 
+    public String getLabel(String identifier) {
+        String label = dataConfig.getString("keys." + identifier + ".label");
+        return label;
+    }
+
     public ItemStack createQRCodeMap(String identifier) {
+        return createQRCodeMap(identifier, identifier);
+    }
+    public ItemStack createQRCodeMap(String identifier, String label) {
         String base64Image = qrImageCache.get(identifier);
 
         if (base64Image == null) {
             String secret = getSecret(identifier);
             if (secret == null) {
-                TwoFactorKeyData keyData = createKey(identifier);
+                TwoFactorKeyData keyData = createKey(identifier, label);
                 base64Image = keyData.getQrCodeImageBase64();
             } else {
                 QrData data = new QrData.Builder()
-                        .label(identifier)
+                        .label(label)
                         .secret(secret)
-                        .issuer("MinecraftServer")
+                        .issuer("RangGames")
                         .algorithm(HashingAlgorithm.SHA1)
                         .digits(6)
                         .period(30)
@@ -250,15 +265,9 @@ public class TwoFAManager {
 
             if (mapMeta != null) {
                 mapMeta.setMapView(mapView);
-                mapMeta.setDisplayName("§e2FA 코드: " + identifier);
-                mapMeta.setLore(java.util.Arrays.asList(
-                        "§7Google Authenticator로 스캔하세요",
-                        "§7ID: " + identifier
-                ));
-
+                mapMeta.setDisplayName("§e2FA Code: " + identifier);
                 mapItem.setItemMeta(mapMeta);
             }
-
             return mapItem;
 
         } catch (IOException e) {
@@ -304,11 +313,20 @@ public class TwoFAManager {
     public static class TwoFactorKeyData {
         private final String identifier;
         private final String secret;
+        private final String label;
         private final String qrCodeUrl;
         private final String qrCodeImageBase64;
 
         public TwoFactorKeyData(String identifier, String secret, String qrCodeUrl, String qrCodeImageBase64) {
             this.identifier = identifier;
+            this.label = identifier;
+            this.secret = secret;
+            this.qrCodeUrl = qrCodeUrl;
+            this.qrCodeImageBase64 = qrCodeImageBase64;
+        }
+        public TwoFactorKeyData(String identifier, String label, String secret, String qrCodeUrl, String qrCodeImageBase64) {
+            this.identifier = identifier;
+            this.label = label;
             this.secret = secret;
             this.qrCodeUrl = qrCodeUrl;
             this.qrCodeImageBase64 = qrCodeImageBase64;
@@ -320,6 +338,9 @@ public class TwoFAManager {
 
         public String getSecret() {
             return secret;
+        }
+        public String getLabel() {
+            return label;
         }
 
         public String getQrCodeUrl() {

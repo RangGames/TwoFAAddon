@@ -54,7 +54,6 @@ public class TwoFAAddon extends JavaPlugin {
         addon = Skript.registerAddon(this);
 
         try {
-
             Skript.registerEffect(EffectRegister2FA.class,
                     "register [new] 2fa [code] (with|for) [id] %string%",
                     "create [new] 2fa [code] (with|for) [id] %string%");
@@ -78,10 +77,6 @@ public class TwoFAAddon extends JavaPlugin {
             Skript.registerCondition(Condition2FAVerify.class,
                     "2fa code %string% is valid (with|for) [id] %string%",
                     "2fa code %string% (isn't|is not) valid (with|for) [id] %string%");
-
-            Skript.registerEffect(EffectVerify2FA.class,
-                    "verify 2fa code %string% (with|for) [id] %string%",
-                    "check [if] 2fa code %string% (is valid|matches) (with|for) [id] %string%");
 
             Skript.registerEffect(EffectRemove2FA.class,
                     "remove 2fa [code] (of|for) [id] %string%",
@@ -107,9 +102,5 @@ public class TwoFAAddon extends JavaPlugin {
     public TwoFAManager getTwoFAManager() {
         return twoFAManager;
     }
-
-
-
-
 
 }
