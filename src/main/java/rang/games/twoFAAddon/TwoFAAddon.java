@@ -56,7 +56,9 @@ public class TwoFAAddon extends JavaPlugin {
         try {
             Skript.registerEffect(EffectRegister2FA.class,
                     "register [new] 2fa [code] (with|for) [id] %string%",
-                    "create [new] 2fa [code] (with|for) [id] %string%");
+                    "create [new] 2fa [code] (with|for) [id] %string%",
+                    "register [new] 2fa [code] (with|for) [id] %string% [and] [with] label %string%",
+                    "create [new] 2fa [code] (with|for) [id] %string% [and] [with] label %string%");
 
             Skript.registerExpression(Expr2FACode.class, String.class, ExpressionType.PROPERTY,
                     "2fa code (of|for) [id] %string%",
@@ -64,7 +66,9 @@ public class TwoFAAddon extends JavaPlugin {
 
             Skript.registerExpression(Expr2FAMap.class, ItemStack.class, ExpressionType.PROPERTY,
                     "2fa [qr] map (of|for) [id] %string%",
-                    "%string%'s 2fa [qr] map");
+                    "%string%'s 2fa [qr] map",
+                    "2fa [qr] map (of|for) [id] %string% [and] [with] label %string%",
+                    "%string%'s 2fa [qr] map [with] [label] %string%");
 
             Skript.registerExpression(Expr2FASecret.class, String.class, ExpressionType.PROPERTY,
                     "2fa secret (of|for) [id] %string%",
