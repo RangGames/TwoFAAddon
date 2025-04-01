@@ -1,0 +1,5 @@
+name: TwoFAAddon
+version: '1.0-SNAPSHOT'
+main: rang.games.twoFAAddon.TwoFAAddon
+api-version: '1.21'
+depend: [Skript]
