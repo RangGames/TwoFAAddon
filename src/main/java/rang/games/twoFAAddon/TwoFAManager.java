@@ -65,12 +65,12 @@ public class TwoFAManager {
         }
 
         this.dataConfig = YamlConfiguration.loadConfiguration(dataFile);
-        loadAllQRDatas();
         this.secretGenerator = new DefaultSecretGenerator();
         this.qrGenerator = new ZxingPngQrGenerator();
         this.timeProvider = new SystemTimeProvider();
         this.codeGenerator = new DefaultCodeGenerator();
         this.codeVerifier = new DefaultCodeVerifier(codeGenerator, timeProvider);
+        loadAllQRDatas();
     }
 
     public void loadAllQRDatas() {
